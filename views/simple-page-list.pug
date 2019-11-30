@@ -1,0 +1,7 @@
+each page in app.pageList
+  section
+    h2
+      a(href=page.href) #{page.title}
+    p #{page.description}
+      | &nbsp;
+      a(href=page.href) #{page.moreLinkText}
