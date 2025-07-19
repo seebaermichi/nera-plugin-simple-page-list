@@ -1,7 +1,12 @@
-each page in app.pageList
-  section
-    h2
-      a(href=page.href) #{page.title}
-    p #{page.description}
-      | &nbsp;
-      a(href=page.href) #{page.moreLinkText}
+if app.pageList && app.pageList.length > 0
+    section.page-list
+        h2.page-list__title Recent Pages
+        each page in app.pageList
+            article.page-list__item
+                header.page-list__header
+                    h3.page-list__item-title
+                        a.page-list__link(href=page.href) #{page.title}
+                if page.description
+                    p.page-list__description #{page.description}
+                footer.page-list__footer
+                    a.page-list__more-link(href=page.href) #{page.moreLinkText}
