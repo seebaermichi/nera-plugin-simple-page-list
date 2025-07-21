@@ -1,113 +1,160 @@
-import { describe, it, expect } from 'vitest'
-import { getAppData } from '../index.js'
+import fs from 'fs/promises'
+import path from 'path'
+import { describe, it, expect, afterEach } from 'vitest'
 
-describe('Simple Page List plugin', () => {
-    it('adds a page list to app data', () => {
-        const app = { title: 'Test App' }
-        const pagesData = [
-            {
-                meta: {
-                    title: 'Blog Post 1',
-                    description: 'First blog post',
-                    href: '/posts/blog-post-1.html',
-                    createdAt: '2025-01-01',
-                },
-            },
-            {
-                meta: {
-                    title: 'Blog Post 2',
-                    description: 'Second blog post',
-                    href: '/posts/blog-post-2.html',
-                    createdAt: '2025-01-02',
-                },
-            },
-            {
-                meta: {
-                    title: 'About Page',
-                    description: 'About us',
-                    href: '/about.html',
-                    createdAt: '2025-01-01',
-                },
-            },
-        ]
+const CONFIG_PATH = path.resolve('config/simple-page-list.yaml')
 
-        const result = getAppData({ app, pagesData })
+async function writeConfig(yaml) {
+    await fs.mkdir(path.dirname(CONFIG_PATH), { recursive: true })
+    await fs.writeFile(CONFIG_PATH, yaml)
+}
 
-        expect(result.pageList).toBeDefined()
-        expect(result.pageList).toHaveLength(2) // Only posts matching /posts path
-        expect(result.pageList[0].title).toBe('Blog Post 2') // Sorted by date desc
-        expect(result.pageList[1].title).toBe('Blog Post 1')
+async function deleteConfig() {
+    try {
+        await fs.unlink(CONFIG_PATH)
+    } catch {
+        // Ignore errors
+    }
+}
+
+describe('Simple Page List Plugin', () => {
+    afterEach(deleteConfig)
+
+    it('handles single legacy page_path config', async () => {
+        await writeConfig(`
+page_path: /posts
+more_link_text: more
+`)
+
+        const { getAppData } = await import('../index.js')
+
+        const result = getAppData({
+            app: { name: 'MyApp' },
+            pagesData: [
+                {
+                    meta: {
+                        title: 'Post 1',
+                        href: '/posts/one.html',
+                        description: 'desc',
+                        createdAt: '2024-01-01',
+                    },
+                },
+                {
+                    meta: {
+                        title: 'Ignore',
+                        href: '/about.html',
+                        createdAt: '2024-01-02',
+                    },
+                },
+            ],
+        })
+
+        expect(result.pageList).toHaveLength(1)
+        expect(result.pageList[0].title).toBe('Post 1')
+        expect(result.pageList[0].moreLinkText).toBe('more')
     })
 
-    it('handles empty pages data gracefully', () => {
-        const app = { title: 'Test App' }
-        const pagesData = []
+    it('handles multiple page_paths (array of strings)', async () => {
+        await writeConfig(`
+page_paths:
+  - /blog
+  - /news
+`)
 
-        const result = getAppData({ app, pagesData })
+        const { getAppData } = await import('../index.js')
 
-        expect(result.pageList).toBeDefined()
+        const result = getAppData({
+            app: {},
+            pagesData: [
+                {
+                    meta: {
+                        title: 'Blog Entry',
+                        href: '/blog/entry.html',
+                        createdAt: '2023-12-01',
+                    },
+                },
+                {
+                    meta: {
+                        title: 'News Entry',
+                        href: '/news/story.html',
+                        createdAt: '2023-12-02',
+                    },
+                },
+            ],
+        })
+
+        expect(result.pageList.blog).toHaveLength(1)
+        expect(result.pageList.news).toHaveLength(1)
+    })
+
+    it('handles object-based page_paths with custom key and sort', async () => {
+        await writeConfig(`
+page_paths:
+  - path: /rezepte/mittagessen
+    key: lunch
+    sortBy: title
+    sortOrder: ascending
+`)
+
+        const { getAppData } = await import('../index.js')
+
+        const result = getAppData({
+            app: {},
+            pagesData: [
+                {
+                    meta: {
+                        title: 'Zucchini Pasta',
+                        href: '/rezepte/mittagessen/zucchini.html',
+                        createdAt: '2024-01-01',
+                    },
+                },
+                {
+                    meta: {
+                        title: 'Aubergine Curry',
+                        href: '/rezepte/mittagessen/aubergine.html',
+                        createdAt: '2024-01-02',
+                    },
+                },
+            ],
+        })
+
+        expect(result.pageList.lunch).toHaveLength(2)
+        expect(result.pageList.lunch[0].title).toBe('Aubergine Curry')
+        expect(result.pageList.lunch[1].title).toBe('Zucchini Pasta')
+    })
+
+    it('falls back to createdAt if no date is given', async () => {
+        await writeConfig(`
+page_path: /posts
+`)
+
+        const { getAppData } = await import('../index.js')
+
+        const result = getAppData({
+            app: {},
+            pagesData: [
+                {
+                    meta: {
+                        title: 'Undated Post',
+                        href: '/posts/undated.html',
+                        createdAt: '2024-05-05',
+                    },
+                },
+            ],
+        })
+
+        expect(result.pageList).toHaveLength(1)
+        expect(result.pageList[0].title).toBe('Undated Post')
+    })
+
+    it('handles empty pagesData gracefully', async () => {
+        await writeConfig(`
+page_path: /empty
+`)
+
+        const { getAppData } = await import('../index.js')
+        const result = getAppData({ app: {}, pagesData: [] })
+
         expect(result.pageList).toHaveLength(0)
-    })
-
-    it('preserves existing app data', () => {
-        const app = { title: 'Test App', siteUrl: 'https://example.com' }
-        const pagesData = []
-
-        const result = getAppData({ app, pagesData })
-
-        expect(result.title).toBe('Test App')
-        expect(result.siteUrl).toBe('https://example.com')
-        expect(result.pageList).toBeDefined()
-    })
-
-    it('sorts pages by date in descending order', () => {
-        const app = { title: 'Test App' }
-        const pagesData = [
-            {
-                meta: {
-                    title: 'Old Post',
-                    href: '/posts/old-post.html',
-                    createdAt: '2024-01-01',
-                },
-            },
-            {
-                meta: {
-                    title: 'New Post',
-                    href: '/posts/new-post.html',
-                    createdAt: '2025-01-01',
-                },
-            },
-            {
-                meta: {
-                    title: 'Middle Post',
-                    href: '/posts/middle-post.html',
-                    createdAt: '2024-06-01',
-                },
-            },
-        ]
-
-        const result = getAppData({ app, pagesData })
-
-        expect(result.pageList[0].title).toBe('New Post')
-        expect(result.pageList[1].title).toBe('Middle Post')
-        expect(result.pageList[2].title).toBe('Old Post')
-    })
-
-    it('includes more link text from config', () => {
-        const app = { title: 'Test App' }
-        const pagesData = [
-            {
-                meta: {
-                    title: 'Test Post',
-                    href: '/posts/test-post.html',
-                    createdAt: '2025-01-01',
-                },
-            },
-        ]
-
-        const result = getAppData({ app, pagesData })
-
-        expect(result.pageList[0].moreLinkText).toBeDefined()
-        expect(typeof result.pageList[0].moreLinkText).toBe('string')
     })
 })

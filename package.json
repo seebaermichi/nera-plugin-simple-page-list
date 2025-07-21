@@ -1,57 +1,57 @@
 {
-  "name": "@nera-static/plugin-simple-page-list",
-  "version": "2.0.0",
-  "description": "A plugin for the Nera static site generator that creates filtered page lists based on directory paths. Perfect for blog post listings, news sections, or any content category.",
-  "main": "index.js",
-  "scripts": {
-    "publish-template": "node ./bin/publish-template.js",
-    "lint": "eslint .",
-    "test": "vitest",
-    "prepare": "husky"
-  },
-  "type": "module",
-  "exports": {
-    ".": "./index.js"
-  },
-  "bin": {
-    "nera-simple-page-list": "./bin/publish-template.js"
-  },
-  "files": [
-    "bin",
-    "config",
-    "views",
-    "index.js",
-    "CHANGELOG.md"
-  ],
-  "keywords": [
-    "nera",
-    "plugin",
-    "page-list",
-    "static-site",
-    "blog",
-    "listing",
-    "bem-css"
-  ],
-  "author": "Michael Becker",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/seebaermichi/nera-plugin-simple-page-list.git"
-  },
-  "bugs": {
-    "url": "https://github.com/seebaermichi/nera-plugin-simple-page-list/issues"
-  },
-  "homepage": "https://github.com/seebaermichi/nera-plugin-simple-page-list#readme",
-  "dependencies": {
-    "@nera-static/plugin-utils": "^1.1.0"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "devDependencies": {
-    "eslint": "^9.31.0",
-    "husky": "^9.1.7",
-    "pug": "^3.0.3",
-    "vitest": "^3.2.4"
-  }
+    "name": "@nera-static/plugin-simple-page-list",
+    "version": "2.1.0",
+    "description": "A plugin for the Nera static site generator that creates configurable, sorted, and grouped page lists based on one or more directory paths. Ideal for blogs, news sections, and categorized content listings.",
+    "main": "index.js",
+    "scripts": {
+        "publish-template": "node ./bin/publish-template.js",
+        "lint": "eslint .",
+        "test": "vitest",
+        "prepare": "husky"
+    },
+    "type": "module",
+    "exports": {
+        ".": "./index.js"
+    },
+    "bin": {
+        "nera-simple-page-list": "./bin/publish-template.js"
+    },
+    "files": [
+        "bin",
+        "config",
+        "views",
+        "index.js",
+        "CHANGELOG.md"
+    ],
+    "keywords": [
+        "nera",
+        "plugin",
+        "page-list",
+        "static-site",
+        "blog",
+        "listing",
+        "bem-css"
+    ],
+    "author": "Michael Becker",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/seebaermichi/nera-plugin-simple-page-list.git"
+    },
+    "bugs": {
+        "url": "https://github.com/seebaermichi/nera-plugin-simple-page-list/issues"
+    },
+    "homepage": "https://github.com/seebaermichi/nera-plugin-simple-page-list#readme",
+    "dependencies": {
+        "@nera-static/plugin-utils": "^1.1.0"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "devDependencies": {
+        "eslint": "^9.31.0",
+        "husky": "^9.1.7",
+        "pug": "^3.0.3",
+        "vitest": "^3.2.4"
+    }
 }

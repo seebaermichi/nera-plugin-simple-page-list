@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-07-21
+
+### Added
+
+-   Support for `page_paths` as an array to define multiple directories
+-   Grouped output via `app.pageList.<key>` for each configured path
+-   Support for individual `key`, `sortBy`, and `sortOrder` per path
+-   Automatic fallback key generation based on folder name if no `key` is specified
+-   Custom sorting by `title`, `date`, or any other frontmatter field
+-   New tests covering all new features and edge cases
+
+### Changed
+
+-   Improved internal sorting logic using reusable sort functions
+-   `getAppData()` now loads configuration directly within the function for testability
+-   Clean fallback handling for legacy `page_path` configuration
+-   Adjusted default template logic to handle both flat and grouped data
+
+### Migration Guide
+
+This update is fully backward-compatible with v2.0.0.
+
+However, you can now:
+
+-   Use multiple directories by replacing:
+
+    ```yaml
+    page_path: /posts
+    ```
+
+    with:
+
+    ```yaml
+    page_paths:
+        - /posts
+        - /news
+    ```
+
+-   Provide custom sorting or keys per path:
+
+    ```yaml
+    page_paths:
+        - path: /recipes/lunch
+          key: lunch
+          sortBy: title
+          sortOrder: ascending
+    ```
+
 ## [2.0.0] - 2025-07-19
 
 ### Added
@@ -60,7 +108,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
     ```bash
     # Old
-    npm install simple-page-list
+    cd src/plugins
+    git clone git@github.com:seebaermichi/nera-plugin-simple-page-list.git simple-page-list
 
     # New
     npm install @nera-static/plugin-simple-page-list
