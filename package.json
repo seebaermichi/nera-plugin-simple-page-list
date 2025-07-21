@@ -1,6 +1,6 @@
 {
     "name": "@nera-static/plugin-simple-page-list",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "description": "A plugin for the Nera static site generator that creates configurable, sorted, and grouped page lists based on one or more directory paths. Ideal for blogs, news sections, and categorized content listings.",
     "main": "index.js",
     "scripts": {

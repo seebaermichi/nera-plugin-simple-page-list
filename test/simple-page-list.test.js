@@ -87,6 +87,48 @@ page_paths:
         expect(result.pageList.news).toHaveLength(1)
     })
 
+    it('exclude pages from exclude pages in config', async () => {
+        await writeConfig(`
+page_paths:
+  - /blog
+  - /news
+exclude_pages:
+  - /news/index.html
+`)
+
+        const { getAppData } = await import('../index.js')
+
+        const result = getAppData({
+            app: {},
+            pagesData: [
+                {
+                    meta: {
+                        title: 'Blog Entry',
+                        href: '/blog/entry.html',
+                        createdAt: '2023-12-01',
+                    },
+                },
+                {
+                    meta: {
+                        title: 'News Entry',
+                        href: '/news/story.html',
+                        createdAt: '2023-12-02',
+                    },
+                },
+                {
+                    meta: {
+                        title: 'News Overview',
+                        href: '/news/index.html',
+                        createdAt: '2023-12-02',
+                    },
+                },
+            ],
+        })
+
+        expect(result.pageList.blog).toHaveLength(1)
+        expect(result.pageList.news).toHaveLength(1)
+    })
+
     it('handles object-based page_paths with custom key and sort', async () => {
         await writeConfig(`
 page_paths:

@@ -51,6 +51,8 @@ page_paths:
 sortBy: date
 sortOrder: descending
 more_link_text: Read more
+exclude_pages:
+    - /recipes/lunch/index.html
 ```
 
 -   `page_paths`: Array of paths (either strings or objects)
@@ -59,6 +61,7 @@ more_link_text: Read more
 -   `sortBy`: Field to sort by (`date`, `title`, etc.)
 -   `sortOrder`: `ascending` or `descending`
 -   Top-level `sortBy`/`sortOrder` apply to all unless overridden per entry
+-   `exclude_pages`: Array of rendered pages which should not be included in the page list (e.g. `/recipes/lunch/index.html`)
 
 ## 🧩 Usage
 

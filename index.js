@@ -53,7 +53,11 @@ function getSortFn(sortBy = 'date', sortOrder = 'descending') {
  */
 function getPageData(pagesData, pagePath, config, sortBy, sortOrder) {
     return pagesData
-        .filter(({ meta }) => meta.href?.includes(pagePath))
+        .filter(
+            ({ meta }) =>
+                meta.href?.includes(pagePath) &&
+                !config.exclude_pages?.includes(meta.href)
+        )
         .map(({ meta }) => ({
             href: meta.href,
             date: parseDate(meta),
