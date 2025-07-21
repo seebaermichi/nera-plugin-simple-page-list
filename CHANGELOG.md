@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2025-07-21
+
+### Added
+
+-   All meta data of the page in the page list
+
+### Changed
+
+-   Each page in the page list will now include all its meta data
+
+### Fixed
+
+-   Sorting by custom keys
+
+### Migration Guide
+
+This update is fully backward-compatible with v2.1.1.
+
+## [2.1.1] - 2025-07-21
+
+### Added
+
+-   Support for `exclude_pages` as an array pages which should be excluded form list
+
+### Changed
+
+-   A page list will now not include pages from `exclude_pages`
+
+### Migration Guide
+
+This update is fully backward-compatible with v2.1.0.
+
+-   Provide pages which should be excluded:
+
+    ```yaml
+    exclude_pages:
+        - /recipes/lunch/index.html
+    ```
+
 ## [2.1.0] - 2025-07-21
 
 ### Added

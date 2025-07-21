@@ -127,9 +127,7 @@ Depending on configuration, the plugin injects one of the following:
 ```js
 app.pageList = [
   {
-    title: "Page Title",
-    description: "Page description",
-    href: "/posts/my-post.html",
+    ...meta
     date: 1705276800000,
     moreLinkText: "Read more"
   },
@@ -141,12 +139,8 @@ app.pageList = [
 
 ```js
 app.pageList = {
-  lunch: [
-    { title, href, date, ... }
-  ],
-  blogPosts: [
-    { title, href, date, ... }
-  ]
+    lunch: [{ moreLinkText, date, ...meta }],
+    blogPosts: [{ moreLinkText, date, ...meta }],
 }
 ```
 

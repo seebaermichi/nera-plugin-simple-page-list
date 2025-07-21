@@ -134,7 +134,7 @@ exclude_pages:
 page_paths:
   - path: /rezepte/mittagessen
     key: lunch
-    sortBy: title
+    sortBy: sorting_key
     sortOrder: ascending
 `)
 
@@ -147,6 +147,7 @@ page_paths:
                     meta: {
                         title: 'Zucchini Pasta',
                         href: '/rezepte/mittagessen/zucchini.html',
+                        sorting_key: 2,
                         createdAt: '2024-01-01',
                     },
                 },
@@ -154,6 +155,7 @@ page_paths:
                     meta: {
                         title: 'Aubergine Curry',
                         href: '/rezepte/mittagessen/aubergine.html',
+                        sorting_key: 1,
                         createdAt: '2024-01-02',
                     },
                 },

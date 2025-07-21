@@ -39,6 +39,7 @@ function getKeyFromPath(p) {
  */
 function getSortFn(sortBy = 'date', sortOrder = 'descending') {
     const dir = sortOrder === 'ascending' ? 1 : -1
+
     return (a, b) => {
         const aVal = a[sortBy] ?? ''
         const bVal = b[sortBy] ?? ''
@@ -59,11 +60,9 @@ function getPageData(pagesData, pagePath, config, sortBy, sortOrder) {
                 !config.exclude_pages?.includes(meta.href)
         )
         .map(({ meta }) => ({
-            href: meta.href,
+            ...meta,
             date: parseDate(meta),
-            description: meta.description,
             moreLinkText: config.more_link_text || 'Read more',
-            title: meta.title,
         }))
         .sort(getSortFn(sortBy, sortOrder))
 }
