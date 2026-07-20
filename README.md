@@ -1,5 +1,8 @@
 # @nera-static/plugin-simple-page-list
 
+[![Test](https://github.com/seebaermichi/nera-plugin-simple-page-list/actions/workflows/test.yml/badge.svg)](https://github.com/seebaermichi/nera-plugin-simple-page-list/actions/workflows/test.yml)
+[![npm version](https://img.shields.io/npm/v/@nera-static/plugin-simple-page-list)](https://www.npmjs.com/package/@nera-static/plugin-simple-page-list)
+
 A plugin for the [Nera](https://github.com/seebaermichi/nera) static site generator that creates filtered page lists based on directory paths. Ideal for blog post listings, news sections, or content categories grouped and sorted chronologically.
 
 ## ✨ Features
