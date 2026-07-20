@@ -43,6 +43,9 @@
         "url": "https://github.com/seebaermichi/nera-plugin-simple-page-list/issues"
     },
     "homepage": "https://github.com/seebaermichi/nera-plugin-simple-page-list#readme",
+    "publishConfig": {
+        "access": "public"
+    },
     "dependencies": {
         "@nera-static/plugin-utils": "^1.2.0"
     },
