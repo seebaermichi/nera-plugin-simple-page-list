@@ -2,8 +2,10 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { publishAllTemplates } from '@nera-static/plugin-utils'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const sourceDir = path.resolve(__dirname, '../views/')
 
 describe('Template publishing', () => {
     const testDir = path.resolve(__dirname, '../test-temp')
@@ -11,92 +13,73 @@ describe('Template publishing', () => {
         testDir,
         'views/vendor/plugin-simple-page-list'
     )
+    const templatePath = path.join(templatesDir, 'simple-page-list.pug')
+    let originalCwd
+
+    const publish = (options = {}) =>
+        publishAllTemplates({
+            pluginName: 'plugin-simple-page-list',
+            sourceDir,
+            ...options,
+        })
 
     beforeEach(() => {
-        // Create test directory structure
         if (fs.existsSync(testDir)) {
             fs.rmSync(testDir, { recursive: true })
         }
         fs.mkdirSync(testDir, { recursive: true })
 
-        // Create dummy package.json for test
+        // Make the directory look like a real Nera project, which is what
+        // validateNeraProject checks for as of plugin-utils 1.2.0 (D4).
         fs.writeFileSync(
             path.join(testDir, 'package.json'),
-            JSON.stringify({ name: 'dummy' })
+            JSON.stringify({ name: 'my-site' })
         )
+        fs.mkdirSync(path.join(testDir, 'config'), { recursive: true })
+        fs.writeFileSync(path.join(testDir, 'config/app.yaml'), 'lang: en\n')
+        fs.mkdirSync(path.join(testDir, 'pages'), { recursive: true })
+
+        originalCwd = process.cwd()
+        process.chdir(testDir)
     })
 
     afterEach(() => {
-        // Clean up test directory
+        process.chdir(originalCwd)
         if (fs.existsSync(testDir)) {
             fs.rmSync(testDir, { recursive: true })
         }
     })
 
-    it('publishes templates to the correct directory', async () => {
-        // Change to test directory
-        const originalCwd = process.cwd()
-        process.chdir(testDir)
-
-        try {
-            // Import and run the publishing logic
-            const { publishAllTemplates } = await import(
-                '@nera-static/plugin-utils'
-            )
-            const sourceDir = path.resolve(__dirname, '../views/')
-
-            const result = publishAllTemplates({
-                pluginName: 'plugin-simple-page-list',
-                sourceDir,
-                expectedPackageName: 'dummy',
-            })
-
-            expect(result).toBe(true)
-            expect(fs.existsSync(templatesDir)).toBe(true)
-            expect(
-                fs.existsSync(path.join(templatesDir, 'simple-page-list.pug'))
-            ).toBe(true)
-        } finally {
-            process.chdir(originalCwd)
-        }
+    it('publishes templates to the correct directory', () => {
+        expect(publish()).toBe(true)
+        expect(fs.existsSync(templatePath)).toBe(true)
     })
 
-    it('skips publishing when templates already exist', async () => {
-        // Change to test directory
-        const originalCwd = process.cwd()
-        process.chdir(testDir)
+    it('skips publishing when templates already exist', () => {
+        fs.mkdirSync(templatesDir, { recursive: true })
+        fs.writeFileSync(templatePath, 'existing content')
 
-        try {
-            // Create existing templates directory
-            fs.mkdirSync(templatesDir, { recursive: true })
-            const existingContent = 'existing content'
-            fs.writeFileSync(
-                path.join(templatesDir, 'simple-page-list.pug'),
-                existingContent
-            )
+        expect(publish()).toBe(true)
+        expect(fs.readFileSync(templatePath, 'utf8')).toBe('existing content')
+    })
 
-            const { publishAllTemplates } = await import(
-                '@nera-static/plugin-utils'
-            )
-            const sourceDir = path.resolve(__dirname, '../views/')
+    it('overwrites existing templates when force is set', () => {
+        fs.mkdirSync(templatesDir, { recursive: true })
+        fs.writeFileSync(templatePath, 'existing content')
 
-            const result = publishAllTemplates({
-                pluginName: 'plugin-simple-page-list',
-                sourceDir,
-                expectedPackageName: 'dummy',
-            })
+        expect(publish({ force: true })).toBe(true)
+        expect(fs.readFileSync(templatePath, 'utf8')).not.toBe(
+            'existing content'
+        )
+        expect(fs.readFileSync(templatePath, 'utf8')).toBe(
+            fs.readFileSync(path.join(sourceDir, 'simple-page-list.pug'), 'utf8')
+        )
+    })
 
-            // publishAllTemplates returns true but skips overwriting existing files
-            expect(result).toBe(true)
+    it('refuses to publish outside a Nera project', () => {
+        fs.rmSync(path.join(testDir, 'config/app.yaml'))
+        fs.rmSync(path.join(testDir, 'pages'), { recursive: true })
 
-            // Verify that existing content was not overwritten
-            const content = fs.readFileSync(
-                path.join(templatesDir, 'simple-page-list.pug'),
-                'utf8'
-            )
-            expect(content).toBe(existingContent)
-        } finally {
-            process.chdir(originalCwd)
-        }
+        expect(publish()).toBe(false)
     })
 })

@@ -1,0 +1,26 @@
+# Configuration for @nera-static/plugin-simple-page-list
+#
+# This file is the shipped default and is NOT read at build time. Nera plugins
+# read their configuration from the *site's* config/ directory, so copy this
+# file to config/simple-page-list.yaml in your project and edit it there.
+
+# Option 1 — single path (legacy). Produces a flat array in `app.pageList`.
+#
+# page_path: /posts
+
+# Option 2 — multiple paths. Produces an object in `app.pageList` keyed by the
+# last path segment, or by an explicit `key`.
+page_paths:
+    - /posts
+
+# Label for the "read more" link.
+more_link_text: Read more
+
+# Field to sort by (`date`, `title`, or any frontmatter field) and direction
+# (`ascending` or `descending`). Both can be overridden per `page_paths` entry.
+sortBy: date
+sortOrder: descending
+
+# Rendered pages to leave out of every list.
+# exclude_pages:
+#     - /posts/index.html

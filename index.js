@@ -1,10 +1,14 @@
 import path from 'path'
 import { getConfig } from '@nera-static/plugin-utils'
 
-const HOST_CONFIG_PATH = path.resolve(
-    process.cwd(),
-    'config/simple-page-list.yaml'
-)
+/**
+ * Resolved per call rather than at module scope, so the path always reflects
+ * the current working directory. Freezing it at import time made the plugin
+ * untestable against a temporary cwd.
+ */
+function getHostConfigPath() {
+    return path.resolve(process.cwd(), 'config/simple-page-list.yaml')
+}
 
 /**
  * Parse date safely with German format support
@@ -35,6 +39,30 @@ function getKeyFromPath(p) {
 }
 
 /**
+ * Normalises a path for comparison: guarantees a single leading slash,
+ * collapses repeated slashes and drops any trailing slash.
+ */
+function normalizePath(p) {
+    return `/${p}`.replace(/\/+/g, '/').replace(/\/+$/, '')
+}
+
+/**
+ * Does `href` live inside the directory `pagePath`?
+ *
+ * Anchored at a path segment boundary rather than a substring match, so
+ * `/blog` matches `/blog/post.html` but not `/blog.html` (the section's own
+ * index page, which used to list itself) or `/my/blog-archive/post.html`.
+ */
+function isInPath(href, pagePath) {
+    if (typeof href !== 'string' || typeof pagePath !== 'string') return false
+
+    const base = normalizePath(pagePath)
+
+    // A configured path of '/' normalises to '' and matches every page.
+    return base === '' || normalizePath(href).startsWith(`${base}/`)
+}
+
+/**
  * Sort comparator
  */
 function getSortFn(sortBy = 'date', sortOrder = 'descending') {
@@ -56,7 +84,7 @@ function getPageData(pagesData, pagePath, config, sortBy, sortOrder) {
     return pagesData
         .filter(
             ({ meta }) =>
-                meta.href?.includes(pagePath) &&
+                isInPath(meta.href, pagePath) &&
                 !config.exclude_pages?.includes(meta.href)
         )
         .map(({ meta }) => ({
@@ -113,7 +141,7 @@ function getPageList(pagesData, config) {
  * Entry point for Nera plugin
  */
 export function getAppData({ app, pagesData }) {
-    const config = getConfig(HOST_CONFIG_PATH)
+    const config = getConfig(getHostConfigPath())
 
     if (!config || (!config.page_path && !config.page_paths)) {
         return app

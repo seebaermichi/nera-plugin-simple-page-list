@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-07-20
+
+### Added
+
+-   the shipped template now renders the grouped `page_paths` output as well as
+    the flat `page_path` output. Previously it read `app.pageList.length`, which
+    is `undefined` for the keyed object, so the documented grouped configuration
+    rendered nothing at all — silently, with no error
+-   `--force` flag on `nera-simple-page-list`, to re-publish templates over an
+    existing `views/vendor/plugin-simple-page-list/` and discard local edits.
+    Without it, publishing still skips existing files
+-   a default `config/simple-page-list.yaml`, which `files` has always
+    advertised but which was never shipped
+-   `sideEffects: false`
+
+### Fixed
+
+-   `page_path` / `page_paths` are matched against a page's directory instead of
+    by substring, so `/blog` no longer matches the section's own `/blog.html`
+    (a `/blog` index page used to list itself) or an unrelated
+    `/my/blog-archive/`
+-   the README's template include used `include /views/vendor/...`, which does
+    not resolve — with the generator's pug `basedir` set to `views/`, the
+    leading `/views/` is doubled into `views/views/vendor/...`. Corrected to the
+    relative `include ../vendor/plugin-simple-page-list/simple-page-list`
+-   the README's template publishing command was not a valid `npx` invocation
+
+### Changed
+
+-   the config path is resolved per call rather than frozen at import time
+-   `@nera-static/plugin-utils` raised to `^1.2.0`, which is where `--force` and
+    the project-shape validation landed
+-   `eslint.config.js` no longer imports the undeclared `@eslint/js`
+
+### Migration Guide
+
+Backward-compatible with v2.1.x. Two things are worth checking:
+
+-   **Template.** Sites that have already published the template keep their
+    vendored copy and render exactly as before; publishing skips existing files.
+    To pick up grouped-output support, re-publish with
+    `npx nera-simple-page-list --force`. Flat-list markup is byte-for-byte
+    unchanged; grouped output adds `.page-list__group` and
+    `.page-list__group-title`, which you may want to style.
+-   **Path matching.** If you relied on the old substring behaviour — a
+    `page_path` matching a section index page or a similarly-named sibling
+    directory — those pages will now drop out of the list. This was the bug.
+
 ## [2.1.2] - 2025-07-21
 
 ### Added

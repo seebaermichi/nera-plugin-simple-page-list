@@ -1,12 +1,43 @@
-if app.pageList && app.pageList.length > 0
+//- Handles both shapes `getAppData` can produce:
+//-   flat    — `app.pageList` is an array          (config uses `page_path`)
+//-   grouped — `app.pageList` is keyed by path     (config uses `page_paths`)
+//- The flat branch emits exactly the markup this template has always emitted,
+//- so published copies keep rendering identically.
+mixin pageListItems(pages)
+    each page in pages
+        article.page-list__item
+            header.page-list__header
+                h3.page-list__item-title
+                    a.page-list__link(href=page.href) #{page.title}
+            if page.description
+                p.page-list__description #{page.description}
+            footer.page-list__footer
+                a.page-list__more-link(href=page.href) #{page.moreLinkText}
+
+-
+    var pageList = app.pageList
+    var isFlat = Array.isArray(pageList)
+    var groups = []
+
+    if (isFlat) {
+        groups = pageList.length ? [{ key: null, pages: pageList }] : []
+    } else if (pageList && typeof pageList === 'object') {
+        groups = Object.keys(pageList)
+            .filter(function (key) {
+                return Array.isArray(pageList[key]) && pageList[key].length > 0
+            })
+            .map(function (key) {
+                return { key: key, pages: pageList[key] }
+            })
+    }
+
+if groups.length > 0
     section.page-list
         h2.page-list__title Recent Pages
-        each page in app.pageList
-            article.page-list__item
-                header.page-list__header
-                    h3.page-list__item-title
-                        a.page-list__link(href=page.href) #{page.title}
-                if page.description
-                    p.page-list__description #{page.description}
-                footer.page-list__footer
-                    a.page-list__more-link(href=page.href) #{page.moreLinkText}
+        if isFlat
+            +pageListItems(groups[0].pages)
+        else
+            each group in groups
+                div.page-list__group
+                    h3.page-list__group-title #{group.key}
+                    +pageListItems(group.pages)

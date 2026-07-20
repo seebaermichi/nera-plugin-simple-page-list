@@ -26,7 +26,14 @@ Nera will automatically detect the plugin and apply the page filtering during th
 
 ## ⚙️ Configuration
 
-Define the filter settings in `config/simple-page-list.yaml`.
+Define the filter settings in `config/simple-page-list.yaml`, in **your site's**
+`config/` directory. The plugin ships a commented `config/simple-page-list.yaml`
+as a starting point; it is documentation only and is never merged into your
+site's configuration.
+
+Paths are matched against a page's directory, anchored at a path segment. So
+`page_path: /blog` includes `/blog/post.html` and `/blog/2024/post.html`, but
+not the section's own `/blog.html` and not an unrelated `/my/blog-archive/`.
 
 ### 🔹 Option 1: Single path (legacy)
 
@@ -149,7 +156,7 @@ app.pageList = {
 Use the default template provided by the plugin:
 
 ```bash
-npx @nera-static/plugin-simple-page-list run publish-template
+npx nera-simple-page-list
 ```
 
 This will copy:
@@ -162,8 +169,22 @@ views/vendor/plugin-simple-page-list/
 You can then include it in your layout:
 
 ```pug
-include /views/vendor/plugin-simple-page-list/simple-page-list
+include ../vendor/plugin-simple-page-list/simple-page-list
 ```
+
+The include path is relative to the including file, so the `../` above assumes
+a layout in `views/layouts/`. Adjust the number of `../` segments to match.
+
+Publishing **skips files that already exist**, so your edits are safe. To pull
+in a newer version of the template and discard your local changes:
+
+```bash
+npx nera-simple-page-list --force
+```
+
+The shipped template handles **both output shapes** — it renders a flat list
+when you configure `page_path`, and one labelled group per key when you
+configure `page_paths`. A single include covers either configuration.
 
 ## 🎨 Styling
 
@@ -173,6 +194,11 @@ The default template uses BEM-style class names:
 .page-list {
 }
 .page-list__title {
+}
+/* grouped output (`page_paths`) only */
+.page-list__group {
+}
+.page-list__group-title {
 }
 .page-list__item {
 }
