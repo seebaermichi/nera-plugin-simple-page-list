@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2026-07-23
+
+### Changed
+
+-   README audit (docs only, no behaviour change): corrected the Compatibility
+    Node line from `>= 18` to `>= 20` (matching `engines.node`) and added the
+    `@nera-static/plugin-utils: ^1.2.0` range; renamed `Output Structure` to the
+    canonical `Generated Output` and moved it below Styling, adding the rendered
+    HTML the shipped template produces; renamed `Testing & Development` to
+    `Development` and replaced the watch-mode `npm test` with `npx vitest run`
+    plus a note; normalised list bullets to a single space; documented that the
+    legacy `page_path` form also honours the top-level `sortBy`/`sortOrder`/
+    `exclude_pages` keys, and that the plugin injects nothing without config
+-   clarified that template publishing skips when the vendor **directory**
+    already exists (not per file), and that `--force` is what delivers a
+    template update to a site that has already published — upgrading the package
+    alone does not
+-   added a note that the BEM class names are a **public contract** and a
+    `## 🤝 Contributing` section linking the Nera contributing guide
+-   guarded the grouped-usage template examples with `if app.pageList && …`
+
 ## [2.3.0] - 2026-07-21
 
 ### Changed

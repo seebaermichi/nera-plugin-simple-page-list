@@ -7,15 +7,15 @@ A plugin for the [Nera](https://github.com/seebaermichi/nera) static site genera
 
 ## ✨ Features
 
--   Filter pages by one or more directory paths
--   Supports flat or grouped page lists (`app.pageList` or `app.pageList.<key>`)
--   Automatic chronological sorting (configurable)
--   Custom sorting by `date`, `title`, or any frontmatter field
--   Access filtered lists globally in templates
--   Includes ready-to-use Pug templates using BEM CSS methodology
--   Configurable "read more" link text
--   Lightweight and zero-runtime overhead
--   Full compatibility with Nera v4.1.0+
+- Filter pages by one or more directory paths
+- Supports flat or grouped page lists (`app.pageList` or `app.pageList.<key>`)
+- Automatic chronological sorting (configurable)
+- Custom sorting by `date`, `title`, or any frontmatter field
+- Access filtered lists globally in templates
+- Includes ready-to-use Pug templates using BEM CSS methodology
+- Configurable "read more" link text
+- Lightweight and zero-runtime overhead
+- Full compatibility with Nera v4.1.0+
 
 ## 🚀 Installation
 
@@ -34,6 +34,10 @@ Define the filter settings in `config/simple-page-list.yaml`, in **your site's**
 as a starting point; it is documentation only and is never merged into your
 site's configuration.
 
+Without a config file — or with one that sets neither `page_path` nor
+`page_paths` — the plugin is a no-op: `app.pageList` is not injected at all, so
+guard for it in your templates (`if app.pageList && …`).
+
 Paths are matched against a page's directory, anchored at a path segment. So
 `page_path: /blog` includes `/blog/post.html` and `/blog/2024/post.html`, but
 not the section's own `/blog.html` and not an unrelated `/my/blog-archive/`.
@@ -45,8 +49,11 @@ page_path: /posts
 more_link_text: Read more
 ```
 
--   `page_path`: Directory to include pages from
--   `more_link_text`: Label for the "read more" link (optional)
+- `page_path`: Directory to include pages from
+- `more_link_text`: Label for the "read more" link (optional)
+
+The top-level `sortBy`, `sortOrder`, and `exclude_pages` keys (see Option 2)
+apply to this legacy form too.
 
 ### 🔹 Option 2: Multiple paths (grouped output)
 
@@ -65,13 +72,13 @@ exclude_pages:
     - /recipes/lunch/index.html
 ```
 
--   `page_paths`: Array of paths (either strings or objects)
-    -   If a string, the last folder segment becomes the key (e.g. `/recipes/lunch` → `lunch`)
-    -   If an object, you can override the `key`, `sortBy`, or `sortOrder`
--   `sortBy`: Field to sort by (`date`, `title`, etc.)
--   `sortOrder`: `ascending` or `descending`
--   Top-level `sortBy`/`sortOrder` apply to all unless overridden per entry
--   `exclude_pages`: Array of rendered pages which should not be included in the page list (e.g. `/recipes/lunch/index.html`)
+- `page_paths`: Array of paths (either strings or objects)
+    - If a string, the last folder segment becomes the key (e.g. `/recipes/lunch` → `lunch`)
+    - If an object, you can override the `key`, `sortBy`, or `sortOrder`
+- `sortBy`: Field to sort by (`date`, `title`, etc.)
+- `sortOrder`: `ascending` or `descending`
+- Top-level `sortBy`/`sortOrder` apply to all unless overridden per entry
+- `exclude_pages`: Array of rendered pages which should not be included in the page list (e.g. `/recipes/lunch/index.html`)
 
 ## 🧩 Usage
 
@@ -89,9 +96,9 @@ date: 2025-01-15
 
 Supported `date` formats:
 
--   `2025-01-15` (ISO)
--   `15.01.2025` (German-style)
--   Any JS-valid date string
+- `2025-01-15` (ISO)
+- `15.01.2025` (German-style)
+- Any JS-valid date string
 
 If `date` is missing, Nera’s `createdAt` will be used as a fallback.
 
@@ -114,7 +121,7 @@ if app.pageList && app.pageList.length > 0
 #### Grouped usage (multiple paths):
 
 ```pug
-if app.pageList.blogPosts
+if app.pageList && app.pageList.blogPosts
   h2 Blog
   each post in app.pageList.blogPosts
     article
@@ -122,36 +129,10 @@ if app.pageList.blogPosts
 ```
 
 ```pug
-if app.pageList.lunch
+if app.pageList && app.pageList.lunch
   h2 Lunch Recipes
   each recipe in app.pageList.lunch
     h3: a(href=recipe.href) #{recipe.title}
-```
-
-## 📊 Output Structure
-
-Depending on configuration, the plugin injects one of the following:
-
-#### 1. Flat array (legacy):
-
-```js
-app.pageList = [
-  {
-    ...meta
-    date: 1705276800000,
-    moreLinkText: "Read more"
-  },
-  ...
-]
-```
-
-#### 2. Grouped object:
-
-```js
-app.pageList = {
-    lunch: [{ moreLinkText, date, ...meta }],
-    blogPosts: [{ moreLinkText, date, ...meta }],
-}
 ```
 
 ## 🛠️ Template Publishing
@@ -178,12 +159,21 @@ include ../vendor/plugin-simple-page-list/simple-page-list
 The include path is relative to the including file, so the `../` above assumes
 a layout in `views/layouts/`. Adjust the number of `../` segments to match.
 
-Publishing **skips files that already exist**, so your edits are safe. To pull
-in a newer version of the template and discard your local changes:
+Publishing **skips when the `views/vendor/plugin-simple-page-list/` directory
+already exists** — the check is on the directory, not on each file — so your
+edits are safe. To pull in a newer version of the template and discard your
+local changes:
 
 ```bash
 npx nera-simple-page-list --force
 ```
+
+> **`--force` is what delivers a template update.** Upgrading the package alone
+> never changes an already-published template: the vendor directory still
+> exists, so a plain re-publish copies nothing and exits `0`. Re-run with
+> `--force` to deliver the new markup — it discards local edits, so diff first
+> if you have customised the template. (Upgrading without `--force` is safe; it
+> simply has no effect on the vendored copy.)
 
 The shipped template handles **both output shapes** — it renders a flat list
 when you configure `page_path`, and one labelled group per key when you
@@ -219,21 +209,101 @@ The default template uses BEM-style class names:
 }
 ```
 
-## 🧪 Testing & Development
+These class names are a **public contract**: consumers hold a vendored copy of
+the template under `views/vendor/plugin-simple-page-list/` and style these
+classes from their own CSS, so renaming one is a **breaking change**.
+
+## 📊 Generated Output
+
+Depending on configuration, the plugin injects one of two shapes into
+`app.pageList`.
+
+### 1. Flat array (legacy `page_path`)
+
+```js
+app.pageList = [
+  {
+    ...meta
+    date: 1705276800000,
+    moreLinkText: "Read more"
+  },
+  ...
+]
+```
+
+### 2. Grouped object (`page_paths`)
+
+```js
+app.pageList = {
+    lunch: [{ moreLinkText, date, ...meta }],
+    blogPosts: [{ moreLinkText, date, ...meta }],
+}
+```
+
+### Rendered markup
+
+Running the shipped template against the flat shape produces:
+
+```html
+<section class="page-list">
+  <h2 class="page-list__title">Recent Pages</h2>
+  <article class="page-list__item">
+    <header class="page-list__header">
+      <h3 class="page-list__item-title"><a class="page-list__link" href="/blog/second-post.html">Second Post</a></h3>
+    </header>
+    <p class="page-list__description">A short summary.</p>
+    <footer class="page-list__footer"><a class="page-list__more-link" href="/blog/second-post.html">Read more</a></footer>
+  </article>
+</section>
+```
+
+The grouped shape wraps each key in a `.page-list__group` block:
+
+```html
+<section class="page-list">
+  <h2 class="page-list__title">Recent Pages</h2>
+  <div class="page-list__group">
+    <h3 class="page-list__group-title">blogPosts</h3>
+    <article class="page-list__item">
+      <header class="page-list__header">
+        <h3 class="page-list__item-title"><a class="page-list__link" href="/blog/hello.html">Hello World</a></h3>
+      </header>
+      <p class="page-list__description">Intro.</p>
+      <footer class="page-list__footer"><a class="page-list__more-link" href="/blog/hello.html">Read more</a></footer>
+    </article>
+  </div>
+</section>
+```
+
+## 🧪 Development
 
 ```bash
 npm install
-npm test
+npx vitest run    # npm test runs Vitest in watch mode, which never exits
 npm run lint
 ```
 
 Tests use [Vitest](https://vitest.dev) and cover:
 
--   Filtering by directory path
--   Sorting by `date`, `title`, etc.
--   Grouped and flat output modes
--   Correct fallback behavior and robustness
--   Template publishing logic
+- Filtering by directory path
+- Sorting by `date`, `title`, etc.
+- Grouped and flat output modes
+- Correct fallback behavior and robustness
+- Template publishing logic
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome. See the
+[Nera contributing guide](https://github.com/seebaermichi/nera/blob/main/CONTRIBUTING.md)
+for plugin development, the hook contract, and local setup.
+
+For this repo specifically:
+
+- `npx vitest run` and `npm run lint` must pass (`npm test` is watch mode).
+- Bump the version and update `CHANGELOG.md` **in the same commit** as the change.
+- Template markup and BEM class names are a **public contract** — users style
+  them from their own CSS, so changing one is a **major** bump.
+- Releases publish from CI on a pushed `v*` tag. Never run `npm publish`.
 
 ## 🧑‍💻 Author
 
@@ -242,15 +312,16 @@ Michael Becker
 
 ## 🔗 Links
 
--   [Plugin Repository](https://github.com/seebaermichi/nera-plugin-simple-page-list)
--   [NPM Package](https://www.npmjs.com/package/@nera-static/plugin-simple-page-list)
--   [Nera Static Site Generator](https://github.com/seebaermichi/nera)
+- [Plugin Repository](https://github.com/seebaermichi/nera-plugin-simple-page-list)
+- [NPM Package](https://www.npmjs.com/package/@nera-static/plugin-simple-page-list)
+- [Nera Static Site Generator](https://github.com/seebaermichi/nera)
 
 ## 🧩 Compatibility
 
--   **Nera**: v4.1.0+
--   **Node.js**: >= 18
--   **Plugin API**: Uses `getAppData()` for injecting filtered page lists
+- **Nera**: v4.1.0+
+- **Node.js**: >= 20
+- **Plugin Utils**: ^1.2.0
+- **Plugin API**: Uses `getAppData()` for injecting filtered page lists
 
 ## 📦 License
 
