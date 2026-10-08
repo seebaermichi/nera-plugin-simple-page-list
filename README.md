@@ -159,7 +159,12 @@ include ../vendor/plugin-simple-page-list/simple-page-list
 ```
 
 The include path is relative to the including file, so the `../` above assumes
-a layout in `views/layouts/`. Adjust the number of `../` segments to match.
+a layout in `views/layouts/`. Adjust the number of `../` segments to match. On
+Nera v4.3.0+ you can use the location-independent form instead:
+
+```pug
+include /vendor/plugin-simple-page-list/simple-page-list
+```
 
 Publishing **skips when the `views/vendor/plugin-simple-page-list/` directory
 already exists** — the check is on the directory, not on each file — so your
@@ -321,8 +326,10 @@ Michael Becker
 
 ## 🧩 Compatibility
 
-- **Nera**: v4.1.0+
-- **Node.js**: >= 20
+- **Nera**: v4.1.0+ — a baseline rather than a requirement; the plugin uses no
+  generator feature above the 4.x line, and the relative include needs no pug
+  `basedir`. The root-absolute `include /vendor/…` form needs v4.3.0+.
+- **Node.js**: >= 20.0.0
 - **Plugin Utils**: ^1.2.0
 - **Plugin API**: Uses `getAppData()` for injecting filtered page lists
 
