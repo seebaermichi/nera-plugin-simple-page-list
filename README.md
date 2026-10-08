@@ -148,9 +148,13 @@ npx nera-simple-page-list
 This will copy:
 
 ```
-views/vendor/plugin-simple-page-list/
+theme/views/vendor/plugin-simple-page-list/
 └── simple-page-list.pug
 ```
+
+That is the path on a site scaffolded with `nera new`, whose views live in
+`theme/views/`. On an older site that renders from root `views/`, drop the
+`theme/` prefix — the command picks the right destination automatically.
 
 You can then include it in your layout:
 
@@ -159,14 +163,17 @@ include ../vendor/plugin-simple-page-list/simple-page-list
 ```
 
 The include path is relative to the including file, so the `../` above assumes
-a layout in `views/layouts/`. Adjust the number of `../` segments to match. On
-Nera v4.3.0+ you can use the location-independent form instead:
+a template one level below the views folder — the shell layout
+`theme/views/layouts/layout.pug` or a page template in `theme/views/pages/`.
+Adjust the number of `../` segments to match. On Nera v4.3.0+ you can use the
+location-independent form instead — there is no `theme/` or `views/` segment in
+it:
 
 ```pug
 include /vendor/plugin-simple-page-list/simple-page-list
 ```
 
-Publishing **skips when the `views/vendor/plugin-simple-page-list/` directory
+Publishing **skips when the `…/vendor/plugin-simple-page-list/` directory
 already exists** — the check is on the directory, not on each file — so your
 edits are safe. To pull in a newer version of the template and discard your
 local changes:
@@ -217,7 +224,7 @@ The default template uses BEM-style class names:
 ```
 
 These class names are a **public contract**: consumers hold a vendored copy of
-the template under `views/vendor/plugin-simple-page-list/` and style these
+the template under `theme/views/vendor/plugin-simple-page-list/` and style these
 classes from their own CSS, so renaming one is a **breaking change**.
 
 ## 📊 Generated Output
@@ -328,7 +335,9 @@ Michael Becker
 
 - **Nera**: v4.1.0+ — a baseline rather than a requirement; the plugin uses no
   generator feature above the 4.x line, and the relative include needs no pug
-  `basedir`. The root-absolute `include /vendor/…` form needs v4.3.0+.
+  `basedir`. The root-absolute `include /vendor/…` form needs v4.3.0+, and the
+  `theme/` folder layout used in the examples above — what `nera new` scaffolds
+  — needs v4.6.0+.
 - **Node.js**: >= 20.0.0
 - **Plugin Utils**: ^1.2.0
 - **Plugin API**: Uses `getAppData()` for injecting filtered page lists
