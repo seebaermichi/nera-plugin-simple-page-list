@@ -15,7 +15,7 @@
         ".": "./index.js"
     },
     "bin": {
-        "nera-simple-page-list": "./bin/publish-template.js"
+        "nera-simple-page-list": "bin/publish-template.js"
     },
     "files": [
         "bin",
@@ -37,7 +37,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/seebaermichi/nera-plugin-simple-page-list.git"
+        "url": "git+https://github.com/seebaermichi/nera-plugin-simple-page-list.git"
     },
     "bugs": {
         "url": "https://github.com/seebaermichi/nera-plugin-simple-page-list/issues"
